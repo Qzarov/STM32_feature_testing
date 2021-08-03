@@ -65,30 +65,52 @@ int flag_sleeping_mode = 0;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+RTC_TimeTypeDef sTime = {0};
+RTC_AlarmTypeDef sAlarm = {0};
+
+void ReInitClock();//TODO
+void SetAlarm(){
+	  /** set the Time
+	  */
+	  sTime.Hours = 0x0;
+	  sTime.Minutes = 0x0;
+	  sTime.Seconds = 0x0;
+
+	  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+	  /** Enable the Alarm A
+	  */
+	  sAlarm.AlarmTime.Hours = 0x0;
+	  sAlarm.AlarmTime.Minutes = 0x0;
+	  sAlarm.AlarmTime.Seconds = 0x15;
+	  sAlarm.Alarm = RTC_ALARM_A;
+	  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM1) //check if the interrupt comes from TIM1
 	{
-		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 		//flag_sleeping_mode = 1;
-		//WKP
-		//HAL_TIM_Base_Stop_IT(&htim1);
-	}
+		SetAlarm();
+		//HAL_RTC_SetAlarm();
+		//HAL_RTC_SetAlarm_IT();
 
-//	if(htim->Instance == TIM2) //check if the interrupt comes from TIM1
-//	{
-//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	}
-//
-//	if(htim->Instance == TIM3) //check if the interrupt comes from TIM1
-//	{
-//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	}
-//
-//	if(htim->Instance == TIM4) //check if the interrupt comes from TIM1
-//	{
-//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//	}
+		HAL_TIM_Base_Stop_IT(&htim1);
+	}
+}
+
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
+{
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+	//ReInitClock();
+	HAL_TIM_Base_Start_IT(&htim1);
 }
 
 /* USER CODE END 0 */
@@ -127,9 +149,9 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-  HAL_TIM_Base_Start_IT(&htim1);
-  HAL_Delay(3000);
+  __HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
+
+  //HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -137,8 +159,11 @@ int main(void)
   while (1)
   {
 	  if(flag_sleeping_mode){
-		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+		  //SetAlarm();
+
 		  flag_sleeping_mode = 0;
+
+		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 	  }
 
 	  //HAL_Delay(500);
@@ -208,9 +233,7 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
-  RTC_TimeTypeDef sTime = {0};
   RTC_DateTypeDef DateToUpdate = {0};
-  RTC_AlarmTypeDef sAlarm = {0};
 
   /* USER CODE BEGIN RTC_Init 1 */
 
@@ -231,30 +254,30 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0;
-  sTime.Minutes = 0;
-  sTime.Seconds = 0;
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
+  sTime.Seconds = 0x0;
 
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
   DateToUpdate.WeekDay = RTC_WEEKDAY_MONDAY;
   DateToUpdate.Month = RTC_MONTH_JANUARY;
-  DateToUpdate.Date = 1;
-  DateToUpdate.Year = 0;
+  DateToUpdate.Date = 0x1;
+  DateToUpdate.Year = 0x0;
 
-  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN) != HAL_OK)
+  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
   /** Enable the Alarm A
   */
-  sAlarm.AlarmTime.Hours = 0;
-  sAlarm.AlarmTime.Minutes = 0;
-  sAlarm.AlarmTime.Seconds = 20;
+  sAlarm.AlarmTime.Hours = 0x0;
+  sAlarm.AlarmTime.Minutes = 0x0;
+  sAlarm.AlarmTime.Seconds = 0x10;
   sAlarm.Alarm = RTC_ALARM_A;
-  if (HAL_RTC_SetAlarm(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
+  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
@@ -285,7 +308,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 7199;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 9999;
+  htim1.Init.Period = 49999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
