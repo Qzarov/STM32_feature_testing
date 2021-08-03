@@ -1,4 +1,10 @@
+.git
 .settings
 .metadata
 Debug
 Release
+.metadata/.log
+*.prefs
+*.xmi
+*.snap
+*.resources
