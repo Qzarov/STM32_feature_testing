@@ -60,7 +60,7 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
-int flag_sleeping_mode = 1;
+int flag_sleeping_mode = 0;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -69,8 +69,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM1) //check if the interrupt comes from TIM1
 	{
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+		//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 		//flag_sleeping_mode = 1;
+		//WKP
 		//HAL_TIM_Base_Stop_IT(&htim1);
 	}
 
@@ -231,7 +232,7 @@ static void MX_RTC_Init(void)
   /** Initialize RTC and set the Time and Date
   */
   sTime.Hours = 0;
-  sTime.Minutes = 5;
+  sTime.Minutes = 0;
   sTime.Seconds = 0;
 
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
@@ -250,8 +251,8 @@ static void MX_RTC_Init(void)
   /** Enable the Alarm A
   */
   sAlarm.AlarmTime.Hours = 0;
-  sAlarm.AlarmTime.Minutes = 5;
-  sAlarm.AlarmTime.Seconds = 10;
+  sAlarm.AlarmTime.Minutes = 0;
+  sAlarm.AlarmTime.Seconds = 20;
   sAlarm.Alarm = RTC_ALARM_A;
   if (HAL_RTC_SetAlarm(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
   {

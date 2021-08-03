@@ -8,3 +8,7 @@ Release
 *.xmi
 *.snap
 *.resources
+*.index
+*.snap
+*.resources
+*.xmi
