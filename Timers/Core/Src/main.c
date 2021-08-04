@@ -60,7 +60,6 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
-int flag_sleeping_mode = 0;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -68,10 +67,10 @@ int flag_sleeping_mode = 0;
 RTC_TimeTypeDef sTime = {0};
 RTC_AlarmTypeDef sAlarm = {0};
 
-void ReInitClock();//TODO
+int flag_sleeping_mode = 0;
+
 void SetAlarm(){
-	  /** set the Time
-	  */
+	  /** set the Time */
 	  sTime.Hours = 0x0;
 	  sTime.Minutes = 0x0;
 	  sTime.Seconds = 0x0;
@@ -80,11 +79,10 @@ void SetAlarm(){
 	  {
 	    Error_Handler();
 	  }
-	  /** Enable the Alarm A
-	  */
+	  /** Enable the Alarm A */
 	  sAlarm.AlarmTime.Hours = 0x0;
 	  sAlarm.AlarmTime.Minutes = 0x0;
-	  sAlarm.AlarmTime.Seconds = 0x15;
+	  sAlarm.AlarmTime.Seconds = 0x28;
 	  sAlarm.Alarm = RTC_ALARM_A;
 	  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
 	  {
@@ -97,19 +95,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM1) //check if the interrupt comes from TIM1
 	{
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		//flag_sleeping_mode = 1;
+		flag_sleeping_mode = 1;
 		SetAlarm();
-		//HAL_RTC_SetAlarm();
-		//HAL_RTC_SetAlarm_IT();
 
-		HAL_TIM_Base_Stop_IT(&htim1);
+		//HAL_TIM_Base_Stop_IT(&htim1);
 	}
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-	//ReInitClock();
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
+	SystemClock_Config();
+	HAL_TIM_Base_Init(&htim1);
+
+	__HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
+
 	HAL_TIM_Base_Start_IT(&htim1);
 }
 
@@ -149,7 +149,6 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  __HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
 
   //HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
@@ -159,10 +158,7 @@ int main(void)
   while (1)
   {
 	  if(flag_sleeping_mode){
-		  //SetAlarm();
-
 		  flag_sleeping_mode = 0;
-
 		  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 	  }
 
@@ -233,7 +229,9 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
+  RTC_TimeTypeDef sTime = {0};
   RTC_DateTypeDef DateToUpdate = {0};
+  RTC_AlarmTypeDef sAlarm = {0};
 
   /* USER CODE BEGIN RTC_Init 1 */
 
@@ -484,10 +482,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8;
+  /*Configure GPIO pins : PA8 PA9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

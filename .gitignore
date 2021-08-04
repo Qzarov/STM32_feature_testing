@@ -12,3 +12,6 @@ Release
 *.snap
 *.resources
 *.xmi
+.metadata/.ide.log
+.metadata/.plugins/org.eclipse.cdt.core/.log
+.metadata/.plugins/org.eclipse.cdt.core/Timers.1627723406163.pdom
