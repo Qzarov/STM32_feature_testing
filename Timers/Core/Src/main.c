@@ -71,20 +71,29 @@ int flag_sleeping_mode = 0;
 
 void SetAlarm(){
 	  /** set the Time */
-	  sTime.Hours = 0x0;
-	  sTime.Minutes = 0x0;
-	  sTime.Seconds = 0x0;
 
-	  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+//	  sTime.Hours = 0x00;
+//	  sTime.Minutes = 0x00;
+//	  sTime.Seconds = 0x00;
+
+	  sTime.Hours = 0;
+	  sTime.Minutes = 0;
+	  sTime.Seconds = 0;
+
+	  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
 	  {
 	    Error_Handler();
 	  }
 	  /** Enable the Alarm A */
-	  sAlarm.AlarmTime.Hours = 0x0;
-	  sAlarm.AlarmTime.Minutes = 0x0;
-	  sAlarm.AlarmTime.Seconds = 0x28;
+//	  sAlarm.AlarmTime.Hours = 0x00;
+//	  sAlarm.AlarmTime.Minutes = 0x00;
+//	  sAlarm.AlarmTime.Seconds = 0xA;
+
+	  sAlarm.AlarmTime.Hours = 0;
+	  sAlarm.AlarmTime.Minutes = 0;
+	  sAlarm.AlarmTime.Seconds = 10;
 	  sAlarm.Alarm = RTC_ALARM_A;
-	  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
+	  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
 	  {
 	    Error_Handler();
 	  }
@@ -95,20 +104,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM1) //check if the interrupt comes from TIM1
 	{
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-		flag_sleeping_mode = 1;
+		//flag_sleeping_mode = 1;
 		SetAlarm();
 
-		//HAL_TIM_Base_Stop_IT(&htim1);
+		HAL_TIM_Base_Stop_IT(&htim1);
 	}
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_9);
-	SystemClock_Config();
-	HAL_TIM_Base_Init(&htim1);
+	//SystemClock_Config();
+	//HAL_TIM_Base_Init(&htim1);
 
-	__HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
+	//__HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
 
 	HAL_TIM_Base_Start_IT(&htim1);
 }
@@ -149,7 +158,7 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-
+  __HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
   //HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
 
@@ -184,11 +193,11 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
@@ -210,7 +219,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -240,6 +249,7 @@ static void MX_RTC_Init(void)
   */
   hrtc.Instance = RTC;
   hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
+  //hrtc.Init.AsynchPrediv = 0x7FFF;
   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
   {
@@ -252,30 +262,30 @@ static void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
+  sTime.Hours = 0;
+  sTime.Minutes = 0;
+  sTime.Seconds = 0;
 
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
   DateToUpdate.WeekDay = RTC_WEEKDAY_MONDAY;
   DateToUpdate.Month = RTC_MONTH_JANUARY;
-  DateToUpdate.Date = 0x1;
-  DateToUpdate.Year = 0x0;
+  DateToUpdate.Date = 1;
+  DateToUpdate.Year = 0;
 
-  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
   /** Enable the Alarm A
   */
-  sAlarm.AlarmTime.Hours = 0x0;
-  sAlarm.AlarmTime.Minutes = 0x0;
-  sAlarm.AlarmTime.Seconds = 0x10;
+  sAlarm.AlarmTime.Hours = 0;
+  sAlarm.AlarmTime.Minutes = 0;
+  sAlarm.AlarmTime.Seconds = 10;
   sAlarm.Alarm = RTC_ALARM_A;
-  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
