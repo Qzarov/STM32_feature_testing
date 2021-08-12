@@ -91,7 +91,7 @@ void SetAlarm(){
 
 	  sAlarm.AlarmTime.Hours = 0;
 	  sAlarm.AlarmTime.Minutes = 0;
-	  sAlarm.AlarmTime.Seconds = 10;
+	  sAlarm.AlarmTime.Seconds = 3;
 	  sAlarm.Alarm = RTC_ALARM_A;
 	  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
 	  {
@@ -282,7 +282,7 @@ static void MX_RTC_Init(void)
   */
   sAlarm.AlarmTime.Hours = 0;
   sAlarm.AlarmTime.Minutes = 0;
-  sAlarm.AlarmTime.Seconds = 10;
+  sAlarm.AlarmTime.Seconds = 5;
   sAlarm.Alarm = RTC_ALARM_A;
   if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
   {
