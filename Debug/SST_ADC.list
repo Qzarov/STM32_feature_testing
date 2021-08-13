@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  00016643  00000000  00000000  000285d8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   000079c7  00000000  00000000  0003ec1b  2**0
+ 17 .debug_line   000079c9  00000000  00000000  0003ec1b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0008111f  00000000  00000000  000465e2  2**0
+ 18 .debug_str    00081135  00000000  00000000  000465e4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  000c7701  2**0
+ 19 .comment      00000053  00000000  00000000  000c7719  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00001798  00000000  00000000  000c7754  2**2
+ 20 .debug_frame  00001798  00000000  00000000  000c776c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -797,11 +797,11 @@ int main(void)
  80009b0:	4910      	ldr	r1, [pc, #64]	; (80009f4 <main+0x64>)
  80009b2:	480f      	ldr	r0, [pc, #60]	; (80009f0 <main+0x60>)
  80009b4:	f000 fb1c 	bl	8000ff0 <HAL_ADC_Start_DMA>
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 	  mcuVoltage = ADC_MAX * ADC_REFERENCE_VOLTAGE / adcData;
  80009b8:	4b0e      	ldr	r3, [pc, #56]	; (80009f4 <main+0x64>)
  80009ba:	881b      	ldrh	r3, [r3, #0]
@@ -1178,9 +1178,9 @@ void HAL_MspInit(void)
 
   /* System interrupt init*/
 
-  /** DISABLE: JTAG-DP Disabled and SW-DP Disabled
+  /** NOJTAG: JTAG-DP Disabled and SW-DP Enabled
   */
-  __HAL_AFIO_REMAP_SWJ_DISABLE();
+  __HAL_AFIO_REMAP_SWJ_NOJTAG();
  8000bc2:	4b0a      	ldr	r3, [pc, #40]	; (8000bec <HAL_MspInit+0x60>)
  8000bc4:	685b      	ldr	r3, [r3, #4]
  8000bc6:	60fb      	str	r3, [r7, #12]
@@ -1188,7 +1188,7 @@ void HAL_MspInit(void)
  8000bca:	f023 63e0 	bic.w	r3, r3, #117440512	; 0x7000000
  8000bce:	60fb      	str	r3, [r7, #12]
  8000bd0:	68fb      	ldr	r3, [r7, #12]
- 8000bd2:	f043 6380 	orr.w	r3, r3, #67108864	; 0x4000000
+ 8000bd2:	f043 7300 	orr.w	r3, r3, #33554432	; 0x2000000
  8000bd6:	60fb      	str	r3, [r7, #12]
  8000bd8:	4a04      	ldr	r2, [pc, #16]	; (8000bec <HAL_MspInit+0x60>)
  8000bda:	68fb      	ldr	r3, [r7, #12]

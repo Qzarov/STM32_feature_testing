@@ -104,8 +104,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  mcuVoltage = ADC_MAX * ADC_REFERENCE_VOLTAGE / adcData;
+
     /* USER CODE BEGIN 3 */
+	  mcuVoltage = ADC_MAX * ADC_REFERENCE_VOLTAGE / adcData;
   }
   /* USER CODE END 3 */
 }
